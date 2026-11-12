@@ -58,7 +58,11 @@ page {
   background-color: var(--bg);
   border: 1rpx solid var(--border);
   border-radius: 12rpx;
-  padding: 18rpx 20rpx;
+  // uni-h5 内置 uni-input{height:1.4em}，border-box 下纵向 padding 会把内部输入区挤没，
+  // 故用固定高度 + 仅横向 padding，行高撑满保证单行文本垂直居中
+  padding: 0 20rpx;
+  height: 84rpx;
+  line-height: 84rpx;
   font-size: 28rpx;
   color: var(--text);
   width: 100%;
@@ -67,7 +71,9 @@ page {
 
 .textarea {
   @extend .input;
-  min-height: 200rpx;
+  height: 240rpx;
+  padding: 18rpx 20rpx;
+  line-height: 1.6;
 }
 
 .btn {
