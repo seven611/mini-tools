@@ -1,0 +1,103 @@
+{
+  "easycom": {
+    "autoscan": true
+  },
+  "pages": [
+    {
+      "path": "pages/index/index",
+      "style": {
+        "navigationBarTitleText": "随手口袋工具"
+      }
+    },
+    {
+      "path": "pages/about/about",
+      "style": {
+        "navigationBarTitleText": "关于"
+      }
+    },
+    {
+      "path": "pages/licenses/licenses",
+      "style": {
+        "navigationBarTitleText": "开源许可"
+      }
+    }
+  ],
+  "subPackages": [
+    {
+      "root": "pages-tools",
+      "pages": [
+        {
+          "path": "qr-code/index",
+          "style": {
+            "navigationBarTitleText": "二维码生成器"
+          }
+        },
+        {
+          "path": "wifi-qr/index",
+          "style": {
+            "navigationBarTitleText": "WiFi 二维码"
+          }
+        },
+        {
+          "path": "password-generator/index",
+          "style": {
+            "navigationBarTitleText": "随机密码生成器"
+          }
+        },
+        {
+          "path": "password-strength/index",
+          "style": {
+            "navigationBarTitleText": "密码强度检测"
+          }
+        },
+        {
+          "path": "text-statistics/index",
+          "style": {
+            "navigationBarTitleText": "字数统计"
+          }
+        },
+        {
+          "path": "percentage-calculator/index",
+          "style": {
+            "navigationBarTitleText": "百分比计算器"
+          }
+        },
+        {
+          "path": "temperature-converter/index",
+          "style": {
+            "navigationBarTitleText": "温度换算"
+          }
+        },
+        {
+          "path": "datetime-converter/index",
+          "style": {
+            "navigationBarTitleText": "时间戳转换"
+          }
+        }
+      ]
+    },
+    {
+      "root": "pages-tools-cn",
+      "pages": [
+        {
+          "path": "rmb-uppercase/index",
+          "style": {
+            "navigationBarTitleText": "人民币大写转换"
+          }
+        }
+      ]
+    }
+  ],
+  "preloadRule": {
+    "pages/index/index": {
+      "network": "wifi",
+      "packages": ["pages-tools"]
+    }
+  },
+  "globalStyle": {
+    "navigationBarTextStyle": "@navTxt",
+    "navigationBarTitleText": "随手口袋工具",
+    "navigationBarBackgroundColor": "@navBg",
+    "backgroundColor": "@bg"
+  }
+}
