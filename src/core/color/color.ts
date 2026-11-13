@@ -52,6 +52,51 @@ export function rgbToHsl({ r, g, b }: RGB): HSL {
   return { h: Math.round(h), s: Math.round(s * 100), l: Math.round(l * 100) }
 }
 
+export interface HSV {
+  h: number
+  s: number
+  v: number
+}
+
+export function rgbToHsv({ r, g, b }: RGB): HSV {
+  const rn = r / 255
+  const gn = g / 255
+  const bn = b / 255
+  const max = Math.max(rn, gn, bn)
+  const min = Math.min(rn, gn, bn)
+  const d = max - min
+  let h = 0
+  if (d !== 0) {
+    if (max === rn) h = (gn - bn) / d + (gn < bn ? 6 : 0)
+    else if (max === gn) h = (bn - rn) / d + 2
+    else h = (rn - gn) / d + 4
+    h *= 60
+  }
+  const s = max === 0 ? 0 : d / max
+  return { h: Math.round(h), s: Math.round(s * 100), v: Math.round(max * 100) }
+}
+
+export function hsvToRgb({ h, s, v }: HSV): RGB {
+  const sn = s / 100
+  const vn = v / 100
+  const c = vn * sn
+  const hp = (((h % 360) + 360) % 360) / 60
+  const x = c * (1 - Math.abs((hp % 2) - 1))
+  let rgb: [number, number, number]
+  if (hp < 1) rgb = [c, x, 0]
+  else if (hp < 2) rgb = [x, c, 0]
+  else if (hp < 3) rgb = [0, c, x]
+  else if (hp < 4) rgb = [0, x, c]
+  else if (hp < 5) rgb = [x, 0, c]
+  else rgb = [c, 0, x]
+  const m = vn - c
+  return {
+    r: Math.round((rgb[0] + m) * 255),
+    g: Math.round((rgb[1] + m) * 255),
+    b: Math.round((rgb[2] + m) * 255),
+  }
+}
+
 export function hslToRgb({ h, s, l }: HSL): RGB {
   const sn = s / 100
   const ln = l / 100

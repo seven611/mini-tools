@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { onLoad } from '@dcloudio/uni-app'
-import { hslToRgb, parseHex, rgbToHex, rgbToHsl, type HSL, type RGB } from '@/core/color/color'
+import { onLoad, onReady } from '@dcloudio/uni-app'
+import { hsvToRgb, parseHex, rgbToHex, rgbToHsl, rgbToHsv, type HSV, type RGB } from '@/core/color/color'
 import { useHistoryStore } from '@/stores/history'
 import { useDebounceFn } from '@/composables/use-debounce'
 import { useToolShare } from '@/composables/use-tool-share'
@@ -13,20 +13,54 @@ const history = useHistoryStore()
 const rgb = ref<RGB>({ r: 33, g: 181, b: 115 })
 const hexText = ref('#21b573')
 
-const PRESETS = ['#21b573', '#3b82f6', '#ef4444', '#f59e0b', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#1f2329', '#ffffff']
-
+const hsv = computed(() => rgbToHsv(rgb.value))
 const hexOut = computed(() => rgbToHex(rgb.value))
-const hsl = computed(() => rgbToHsl(rgb.value))
+const hslStr = computed(() => {
+  const { h, s, l } = rgbToHsl(rgb.value)
+  return `hsl(${h}, ${s}%, ${l}%)`
+})
 const rgbStr = computed(() => `rgb(${rgb.value.r}, ${rgb.value.g}, ${rgb.value.b})`)
-const hslStr = computed(() => `hsl(${hsl.value.h}, ${hsl.value.s}%, ${hsl.value.l}%)`)
 const onColor = computed(() => {
   const { r, g, b } = rgb.value
   return (r * 299 + g * 587 + b * 114) / 1000 > 150 ? '#1f2329' : '#ffffff'
 })
+const pureHue = computed(() => rgbToHex(hsvToRgb({ h: hsv.value.h, s: 100, v: 100 })))
+const svBackground = computed(() =>
+  `linear-gradient(to top, #000, rgba(0,0,0,0)), linear-gradient(to right, #fff, ${pureHue.value})`)
+const hueBackground = 'linear-gradient(to right, #f00 0%, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00 100%)'
+
+let svRect: UniApp.NodeInfo | null = null
+let hueRect: UniApp.NodeInfo | null = null
+onReady(() => {
+  uni.createSelectorQuery().select('#sv').boundingClientRect(r => { svRect = r as UniApp.NodeInfo }).exec()
+  uni.createSelectorQuery().select('#hue').boundingClientRect(r => { hueRect = r as UniApp.NodeInfo }).exec()
+})
+
+const clamp = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, n))
 
 function applyRgb(next: RGB) {
   rgb.value = next
   hexText.value = rgbToHex(next)
+}
+function applyHsv(next: HSV) {
+  applyRgb(hsvToRgb(next))
+}
+function coord(e: any) {
+  if (e.type === 'mousemove' && e.buttons !== 1) return null
+  return e.touches?.[0] ?? e
+}
+function svTouch(e: any) {
+  const t = coord(e)
+  if (!svRect || !t) return
+  const x = clamp(t.clientX - svRect.left!, 0, svRect.width!)
+  const y = clamp(t.clientY - svRect.top!, 0, svRect.height!)
+  applyHsv({ ...hsv.value, s: Math.round((x / svRect.width!) * 100), v: Math.round(100 - (y / svRect.height!) * 100) })
+}
+function hueTouch(e: any) {
+  const t = coord(e)
+  if (!hueRect || !t) return
+  const x = clamp(t.clientX - hueRect.left!, 0, hueRect.width!)
+  applyHsv({ ...hsv.value, h: Math.round((x / hueRect.width!) * 360) })
 }
 function onHexInput(v: string) {
   hexText.value = v
@@ -34,15 +68,7 @@ function onHexInput(v: string) {
   if (parsed) rgb.value = parsed
 }
 function onRgbInput(ch: keyof RGB, v: string) {
-  const n = Math.max(0, Math.min(255, Math.round(Number(v) || 0)))
-  applyRgb({ ...rgb.value, [ch]: n })
-}
-function onHslChange(ch: keyof HSL, v: number) {
-  applyRgb(hslToRgb({ ...hsl.value, [ch]: v }))
-}
-function pick(hex: string) {
-  const parsed = parseHex(hex)
-  if (parsed) applyRgb(parsed)
+  applyRgb({ ...rgb.value, [ch]: clamp(Math.round(Number(v) || 0), 0, 255) })
 }
 
 const saveSnapshot = useDebounceFn(() => {
@@ -62,25 +88,17 @@ onLoad((options) => {
 <template>
   <tool-page>
     <view class="card">
-      <view class="card-title">选色 · 实时预览</view>
-      <view class="swatch" :style="{ backgroundColor: hexOut }">
-        <text class="swatch-hex" :style="{ color: onColor }">{{ hexOut }}</text>
+      <view class="card-title">渐变选色板</view>
+      <view id="sv" class="sv" :style="{ background: svBackground }"
+        @touchstart="svTouch" @touchmove.prevent="svTouch" @mousedown="svTouch" @mousemove="svTouch">
+        <view class="dot" :style="{ left: hsv.s + '%', top: (100 - hsv.v) + '%' }" />
       </view>
-
-      <view class="presets">
-        <view v-for="p in PRESETS" :key="p" class="preset" :class="{ on: hexOut === p }"
-          :style="{ backgroundColor: p }" @click="pick(p)" />
+      <view id="hue" class="hue" :style="{ background: hueBackground }"
+        @touchstart="hueTouch" @touchmove.prevent="hueTouch" @mousedown="hueTouch" @mousemove="hueTouch">
+        <view class="dot hue-dot" :style="{ left: (hsv.h / 360 * 100) + '%' }" />
       </view>
-
-      <view class="slider-row" v-for="row in ([
-        { ch: 'h', label: 'H', max: 360, val: hsl.h },
-        { ch: 's', label: 'S', max: 100, val: hsl.s },
-        { ch: 'l', label: 'L', max: 100, val: hsl.l },
-      ] as const)" :key="row.ch">
-        <text class="ch">{{ row.label }}</text>
-        <slider :value="row.val" :min="0" :max="row.max" :block-size="20" activeColor="#21b573"
-          @change="onHslChange(row.ch, Number(($event as any).detail.value))" />
-        <text class="val">{{ row.val }}</text>
+      <view class="preview" :style="{ backgroundColor: hexOut }">
+        <text :style="{ color: onColor }">{{ hexOut }}</text>
       </view>
     </view>
 
@@ -106,37 +124,40 @@ onLoad((options) => {
 
 <style lang="scss" scoped>
 .gap { margin-top: 20rpx; }
-.swatch {
-  height: 200rpx;
+.sv {
+  position: relative;
+  height: 320rpx;
+  border-radius: 16rpx;
+  border: 1rpx solid var(--border);
+}
+.hue {
+  position: relative;
+  height: 48rpx;
+  border-radius: 24rpx;
+  margin-top: 24rpx;
+  border: 1rpx solid var(--border);
+}
+.dot {
+  position: absolute;
+  width: 36rpx;
+  height: 36rpx;
+  border-radius: 50%;
+  border: 4rpx solid #ffffff;
+  box-shadow: 0 0 6rpx rgba(0, 0, 0, 0.4);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.hue-dot { top: 50%; }
+.preview {
+  margin-top: 24rpx;
+  height: 96rpx;
   border-radius: 16rpx;
   border: 1rpx solid var(--border);
   display: flex;
-  align-items: flex-end;
-  justify-content: flex-end;
-  padding: 16rpx;
-}
-.swatch-hex { font-size: 28rpx; font-weight: 700; }
-.presets {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16rpx;
-  margin-top: 20rpx;
-}
-.preset {
-  width: 64rpx;
-  height: 64rpx;
-  border-radius: 14rpx;
-  border: 1rpx solid var(--border);
-  &.on { outline: 4rpx solid var(--brand); outline-offset: 2rpx; }
-}
-.slider-row {
-  display: flex;
   align-items: center;
-  gap: 16rpx;
-  margin-top: 16rpx;
-  slider { flex: 1; }
-  .ch { flex: 0 0 40rpx; font-size: 26rpx; color: var(--text-2); font-weight: 600; }
-  .val { flex: 0 0 70rpx; text-align: right; font-size: 26rpx; }
+  justify-content: center;
+  font-size: 28rpx;
+  font-weight: 700;
 }
 .rgb-row { display: flex; gap: 16rpx; }
 .rgb { flex: 1; text-align: center; }
