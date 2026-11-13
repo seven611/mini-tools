@@ -151,7 +151,7 @@ export const TOOLS: ToolMeta[] = [
   {
     id: 'color-converter',
     name: '颜色转换',
-    description: 'HEX/RGB/HSL 互转与实时预览',
+    description: '选色或输入色值，实时预览与色值',
     keywords: ['颜色', '转换', 'yanse', 'hex', 'rgb', 'hsl', '色值', '配色'],
     icon: '◐',
     color: '#A855F7',
