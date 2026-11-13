@@ -12,6 +12,8 @@ const history = useHistoryStore()
 
 const rgb = ref<RGB>({ r: 33, g: 181, b: 115 })
 const hexText = ref('#21b573')
+const drag = ref<'' | 'sv' | 'hue'>('')
+function endDrag() { drag.value = '' }
 
 const hsv = computed(() => rgbToHsv(rgb.value))
 const hexOut = computed(() => rgbToHex(rgb.value))
@@ -38,6 +40,18 @@ onReady(() => {
 
 const clamp = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, n))
 
+function bindMouse(handler: (e: any) => void) {
+  if (typeof window === 'undefined') return
+  const move = (e: any) => handler(e)
+  const up = () => {
+    endDrag()
+    window.removeEventListener('mousemove', move)
+    window.removeEventListener('mouseup', up)
+  }
+  window.addEventListener('mousemove', move)
+  window.addEventListener('mouseup', up)
+}
+
 function applyRgb(next: RGB) {
   rgb.value = next
   hexText.value = rgbToHex(next)
@@ -49,18 +63,29 @@ function coord(e: any) {
   if (e.type === 'mousemove' && e.buttons !== 1) return null
   return e.touches?.[0] ?? e
 }
+function liveRect(id: string): UniApp.NodeInfo | null {
+  if (typeof window === 'undefined' || typeof document === 'undefined') return null
+  const el = document.getElementById(id)
+  return el ? (el.getBoundingClientRect() as unknown as UniApp.NodeInfo) : null
+}
 function svTouch(e: any) {
   const t = coord(e)
-  if (!svRect || !t) return
-  const x = clamp(t.clientX - svRect.left!, 0, svRect.width!)
-  const y = clamp(t.clientY - svRect.top!, 0, svRect.height!)
-  applyHsv({ ...hsv.value, s: Math.round((x / svRect.width!) * 100), v: Math.round(100 - (y / svRect.height!) * 100) })
+  const r = liveRect('sv') ?? svRect
+  if (!r || !t) return
+  drag.value = 'sv'
+  const x = clamp(t.clientX - r.left!, 0, r.width!)
+  const y = clamp(t.clientY - r.top!, 0, r.height!)
+  applyHsv({ ...hsv.value, s: Math.round((x / r.width!) * 100), v: Math.round(100 - (y / r.height!) * 100) })
+  if (e.type === 'mousedown') bindMouse(svTouch)
 }
 function hueTouch(e: any) {
   const t = coord(e)
-  if (!hueRect || !t) return
-  const x = clamp(t.clientX - hueRect.left!, 0, hueRect.width!)
-  applyHsv({ ...hsv.value, h: Math.round((x / hueRect.width!) * 360) })
+  const r = liveRect('hue') ?? hueRect
+  if (!r || !t) return
+  drag.value = 'hue'
+  const x = clamp(t.clientX - r.left!, 0, r.width!)
+  applyHsv({ ...hsv.value, h: Math.round((x / r.width!) * 360) })
+  if (e.type === 'mousedown') bindMouse(hueTouch)
 }
 function onHexInput(v: string) {
   hexText.value = v
@@ -90,12 +115,14 @@ onLoad((options) => {
     <view class="card">
       <view class="card-title">渐变选色板</view>
       <view id="sv" class="sv" :style="{ background: svBackground }"
-        @touchstart="svTouch" @touchmove.prevent="svTouch" @mousedown="svTouch" @mousemove="svTouch">
-        <view class="dot" :style="{ left: hsv.s + '%', top: (100 - hsv.v) + '%' }" />
+        @touchstart="svTouch" @touchmove.stop.prevent="svTouch" @touchend="endDrag"
+        @mousedown="svTouch" @mousemove="svTouch" @mouseup="endDrag" @mouseleave="endDrag">
+        <view class="dot" :class="{ active: drag === 'sv' }" :style="{ left: hsv.s + '%', top: (100 - hsv.v) + '%' }" />
       </view>
       <view id="hue" class="hue" :style="{ background: hueBackground }"
-        @touchstart="hueTouch" @touchmove.prevent="hueTouch" @mousedown="hueTouch" @mousemove="hueTouch">
-        <view class="dot hue-dot" :style="{ left: (hsv.h / 360 * 100) + '%' }" />
+        @touchstart="hueTouch" @touchmove.stop.prevent="hueTouch" @touchend="endDrag"
+        @mousedown="hueTouch" @mousemove="hueTouch" @mouseup="endDrag" @mouseleave="endDrag">
+        <view class="dot hue-dot" :class="{ active: drag === 'hue' }" :style="{ left: (hsv.h / 360 * 100) + '%' }" />
       </view>
       <view class="preview" :style="{ backgroundColor: hexOut }">
         <text :style="{ color: onColor }">{{ hexOut }}</text>
@@ -137,6 +164,8 @@ onLoad((options) => {
   margin-top: 24rpx;
   border: 1rpx solid var(--border);
 }
+.sv { cursor: crosshair; }
+.hue { cursor: pointer; }
 .dot {
   position: absolute;
   width: 36rpx;
@@ -145,7 +174,13 @@ onLoad((options) => {
   border: 4rpx solid #ffffff;
   box-shadow: 0 0 6rpx rgba(0, 0, 0, 0.4);
   transform: translate(-50%, -50%);
-  pointer-events: none;
+  cursor: grab;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+  &.active {
+    cursor: grabbing;
+    transform: translate(-50%, -50%) scale(1.25);
+    box-shadow: 0 0 12rpx rgba(0, 0, 0, 0.55);
+  }
 }
 .hue-dot { top: 50%; }
 .preview {
