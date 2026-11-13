@@ -86,12 +86,47 @@
           }
         }
       ]
+    },
+    {
+      "root": "pages-tools-more",
+      "pages": [
+        {
+          "path": "mortgage/index",
+          "style": {
+            "navigationBarTitleText": "房贷计算器"
+          }
+        },
+        {
+          "path": "unit-converter/index",
+          "style": {
+            "navigationBarTitleText": "单位换算"
+          }
+        },
+        {
+          "path": "color-converter/index",
+          "style": {
+            "navigationBarTitleText": "颜色转换"
+          }
+        },
+        {
+          "path": "text-diff/index",
+          "style": {
+            "navigationBarTitleText": "文本对比"
+          }
+        },
+        {
+          "path": "base64/index",
+          "style": {
+            "navigationBarTitleText": "Base64 编解码"
+          }
+        }
+      ]
     }
   ],
   "preloadRule": {
     "pages/index/index": {
       "network": "wifi",
-      "packages": ["pages-tools"]
+      "packages": ["pages-tools", "pages-tools-more"]
     }
   },
   "globalStyle": {

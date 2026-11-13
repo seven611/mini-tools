@@ -43,3 +43,17 @@
 14. **WiFi 码收紧**：PEAP 的 phase2 为 `'None'` 时视为缺失返回 null（上游仅判空值）；可选字段给默认值。
 
 每个移植文件头部保留上游版权声明与本修改说明。
+
+## 二期原创工具（无上游代码拷贝）
+
+以下工具为原创实现（标准数学/计算机算法，未拷贝上游代码），同样以 GPL-3.0 发布，文件头标注 Original：
+
+| 本仓库模块 | 功能 | 状态 |
+|---|---|---|
+| src/core/mortgage/ | 房贷等额本息/等额本金 + 逐月明细 | 已实现，单测绿 |
+| src/core/units/ | 长度/重量/面积/速度/数据单位换算 | 已实现，单测绿 |
+| src/core/color/ | HEX/RGB/HSL 互转 | 已实现，单测绿 |
+| src/core/text/diff.ts | LCS 行级文本对比 | 已实现，单测绿 |
+| src/core/text/base64.ts | 手工 UTF-8 Base64 编解码 | 已实现，单测绿 |
+
+二期页面位于分包 `pages-tools-more`，复用一期三层架构与组件（tool-page/result-row/copy-button）。
