@@ -105,10 +105,7 @@ onShow(() => {
     </view>
 
     <view class="footer">
-      <view class="footer-link" @click="openAbout">
-        关于 · 开源许可
-      </view>
-      <view class="muted">基于开源项目 it-tools 移植 · GPL-3.0</view>
+      <view class="about-entry" @click="openAbout">ⓘ</view>
     </view>
   </view>
 </template>
@@ -184,8 +181,15 @@ onShow(() => {
   gap: 8rpx;
 }
 
-.footer-link {
-  color: var(--brand);
-  font-size: 26rpx;
+.about-entry {
+  width: 64rpx;
+  height: 64rpx;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: var(--text-3);
+  font-size: 36rpx;
 }
 </style>
