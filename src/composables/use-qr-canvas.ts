@@ -18,18 +18,21 @@ export interface QrExportOptions extends QrDrawOptions {
 export function useQrCanvas() {
   function getCanvasNode(selector: string, instance: unknown): Promise<{ node: any; width: number; height: number }> {
     return new Promise((resolve, reject) => {
-      uni.createSelectorQuery()
-        .in(instance as any)
-        .select(selector)
-        .fields({ node: true, size: true }, (res: any) => {
-          if (res && res.node) {
-            resolve(res)
-          }
-          else {
-            reject(new Error('canvas node not found'))
-          }
-        })
-        .exec()
+      const query = uni.createSelectorQuery().in(instance as any)
+      query.select(selector).fields({ node: true, size: true }, () => {})
+      // #ifdef MP-WEIXIN
+      // canvas 位于 tool-page 组件插槽内，页面级查询需 >>> 穿透自定义组件边界
+      query.select(`tool-page >>> ${selector}`).fields({ node: true, size: true }, () => {})
+      // #endif
+      query.exec((res: any[]) => {
+        const hit = (res || []).find(r => r && r.node)
+        if (hit) {
+          resolve(hit)
+        }
+        else {
+          reject(new Error('canvas node not found'))
+        }
+      })
     })
   }
 

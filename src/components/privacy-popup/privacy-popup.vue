@@ -9,7 +9,7 @@ const { visible, agree, disagree } = usePrivacy()
     <view class="popup">
       <view class="title">隐私保护提示</view>
       <view class="body">
-        复制结果需使用剪贴板，保存二维码需写入相册。所有计算均在本地完成，数据不出手机。
+        复制结果需使用剪贴板，保存二维码/压缩图需写入相册，图片压缩需读取所选图片。所有计算均在本地完成，数据不出手机。
       </view>
       <view class="actions">
         <button class="btn btn-plain" @click="disagree">

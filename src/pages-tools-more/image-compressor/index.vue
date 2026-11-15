@@ -48,8 +48,10 @@ async function pick() {
     compressed.value = null
     await runCompress()
   }
-  catch {
-    // user cancelled
+  catch (e: any) {
+    if (!/cancel/i.test(e?.errMsg || '')) {
+      uni.showToast({ title: '选择图片失败，请确认已授权隐私指引', icon: 'none' })
+    }
   }
 }
 function save() {
