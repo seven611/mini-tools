@@ -1,10 +1,11 @@
 /*
  * Original for 随手口袋工具 (GPL-3.0).
- * 只用 qrcode 的纯计算入口 create() 取位矩阵，供小程序 canvas 2d 手动绘制，
- * 不触碰其 browser build / toDataURL（依赖 document）。
+ * 只用 qrcode 的纯计算核心 create() 取位矩阵，供小程序 canvas 2d 手动绘制。
+ * 注意：必须引 qrcode/lib/core/qrcode（纯逻辑、零平台依赖）。
+ * 主入口 qrcode 走 Node server build（pngjs/fs），小程序端 create 会抛错。
  */
 
-import QRCode from 'qrcode'
+import QRCode from 'qrcode/lib/core/qrcode'
 
 export type ErrorCorrectionLevel = 'L' | 'M' | 'Q' | 'H'
 
