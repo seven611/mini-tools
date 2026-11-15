@@ -55,5 +55,6 @@
 | src/core/color/ | HEX/RGB/HSL 互转 | 已实现，单测绿 |
 | src/core/text/diff.ts | LCS 行级文本对比 | 已实现，单测绿 |
 | src/core/text/base64.ts | 手工 UTF-8 Base64 编解码 | 已实现，单测绿 |
+| src/core/image/ + src/adapters/image.ts | 图片压缩（目标尺寸/字节格式化纯逻辑 + 平台压缩适配） | 已实现，单测绿；MP 用 wx.compressImage，H5 用 canvas |
 
 二期页面位于分包 `pages-tools-more`，复用一期三层架构与组件（tool-page/result-row/copy-button）。

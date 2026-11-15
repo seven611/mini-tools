@@ -15,7 +15,7 @@ export interface ToolMeta {
   pagePath: string
   source: ToolSource
   upstreamPath?: string
-  privacy: ('clipboard' | 'album')[]
+  privacy: ('clipboard' | 'album' | 'albumRead')[]
 }
 
 export const TOOLS: ToolMeta[] = [
@@ -180,6 +180,17 @@ export const TOOLS: ToolMeta[] = [
     pagePath: '/pages-tools-more/base64/index',
     source: 'original',
     privacy: ['clipboard'],
+  },
+  {
+    id: 'image-compressor',
+    name: '图片压缩',
+    description: '本地压缩图片，质量尺寸可调',
+    keywords: ['图片', '压缩', 'yasuo', 'image', 'compress', '体积', '缩小', '照片'],
+    icon: '⊟',
+    color: '#84CC16',
+    pagePath: '/pages-tools-more/image-compressor/index',
+    source: 'original',
+    privacy: ['albumRead', 'album'],
   },
 ]
 

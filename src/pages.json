@@ -119,6 +119,12 @@
           "style": {
             "navigationBarTitleText": "Base64 编解码"
           }
+        },
+        {
+          "path": "image-compressor/index",
+          "style": {
+            "navigationBarTitleText": "图片压缩"
+          }
         }
       ]
     }
