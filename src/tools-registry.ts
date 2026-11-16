@@ -20,6 +20,17 @@ export interface ToolMeta {
 
 export const TOOLS: ToolMeta[] = [
   {
+    id: 'image-compressor',
+    name: '图片压缩',
+    description: '本地压缩图片，质量尺寸可调',
+    keywords: ['图片', '压缩', 'yasuo', 'image', 'compress', '体积', '缩小', '照片'],
+    icon: '⊟',
+    color: '#84CC16',
+    pagePath: '/pages-tools-more/image-compressor/index',
+    source: 'original',
+    privacy: ['albumRead', 'album'],
+  },
+  {
     id: 'qr-code',
     name: '二维码生成器',
     description: '文字/链接转二维码，可保存分享',
@@ -180,17 +191,6 @@ export const TOOLS: ToolMeta[] = [
     pagePath: '/pages-tools-more/base64/index',
     source: 'original',
     privacy: ['clipboard'],
-  },
-  {
-    id: 'image-compressor',
-    name: '图片压缩',
-    description: '本地压缩图片，质量尺寸可调',
-    keywords: ['图片', '压缩', 'yasuo', 'image', 'compress', '体积', '缩小', '照片'],
-    icon: '⊟',
-    color: '#84CC16',
-    pagePath: '/pages-tools-more/image-compressor/index',
-    source: 'original',
-    privacy: ['albumRead', 'album'],
   },
 ]
 

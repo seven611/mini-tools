@@ -4,6 +4,7 @@
 
 import { defineStore } from 'pinia'
 import { readStorage, writeStorage } from '@/adapters/storage'
+import { trackToolUse } from '@/adapters/track'
 
 export interface HistoryEntry {
   id: string
@@ -27,6 +28,7 @@ export const useHistoryStore = defineStore('history', {
       const rest = this.entries.filter(entry => entry.id !== id)
       this.entries = [{ id, ts: Date.now(), snapshot: prev?.snapshot }, ...rest].slice(0, MAX_ENTRIES)
       this.persist()
+      trackToolUse(id)
     },
     saveSnapshot(id: string, snapshot: Record<string, unknown>) {
       const entry = this.entries.find(item => item.id === id)
